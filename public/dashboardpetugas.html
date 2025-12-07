@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Halo Merah - Web Petugas</title>
+  <style>
+   body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 1.5rem;
+      background: linear-gradient(135deg, #f0f4f8, #d9e2ec);
+      color: #333;
+      animation: fadeIn 0.6s ease-in;
+    }
+
+    /* Headings */
+    h1, h3 {
+      text-align: center;
+      color: #2c3e50;
+      margin: 1.5rem 0 1rem 0;
+      font-weight: 700;
+      text-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      font-size: 2.8rem;
+    }
+
+    h3 {
+      font-size: 1.6rem;
+      font-weight: 500;
+      color: #34495e;
+    }
+
+    /* Form Search */
+    .form-search {
+      text-align: center;
+      margin-bottom: 30px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    .form-search input {
+      padding: 12px 16px;
+      width: 280px;
+      max-width: 85vw;
+      border: 1.5px solid #a8dadc;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: border-color 0.3s ease;
+    }
+
+    .form-search input:focus {
+      outline: none;
+      border-color: #1d3557;
+      box-shadow: 0 0 8px rgba(29, 53, 87, 0.25);
+    }
+
+    .form-search button {
+      padding: 12px 26px;
+      background-color: #457b9d;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      cursor: pointer;
+      box-shadow: 0 4px 7px rgba(69, 123, 157, 0.4);
+      transition: background-color 0.3s ease, transform 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .form-search button:hover {
+      background-color: #1d3557;
+      transform: scale(1.05);
+    }
+
+    /* Map */
+    #map {
+      width: 100%;
+      height: 420px;
+      margin-bottom: 30px;
+      border-radius: 10px;
+      border: 2px solid #a8dadc;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+      transition: box-shadow 0.3s ease;
+    }
+
+    #map:hover {
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    }
+
+    /* Info Route */
+    #infoRoute {
+      text-align: center;
+      margin-bottom: 30px;
+      font-weight: 600;
+      font-size: 18px;
+      color: #1d3557;
+      letter-spacing: 0.03em;
+      text-shadow: 0 1px 2px rgba(29, 53, 87, 0.15);
+    }
+
+    /* Table Styles */
+    .table-container {
+      overflow-x: auto;
+      margin-top: 30px;
+      border-radius: 10px;
+      border: 2px solid #a8dadc;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      background-color: white;
+      transition: box-shadow 0.3s ease;
+    }
+
+    .table-container:hover {
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0 8px;
+      min-width: 620px;
+    }
+
+    table, th, td {
+      border: none;
+    }
+
+    th {
+      background-color: #457b9d;
+      color: white;
+      font-weight: 700;
+      padding: 14px 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      border-top-left-radius: 8px;
+      border-top-right-radius: 8px;
+    }
+
+    td {
+      background-color: #f9f9f9;
+      padding: 14px 10px;
+      color: #2f3e46;
+      font-weight: 500;
+      box-shadow: inset 0 -1px 0 #eaeaea;
+      vertical-align: middle;
+      border-radius: 0 0 8px 8px;
+      transition: background-color 0.3s ease;
+    }
+
+    table tr:hover td {
+      background-color: #e0f7fa;
+    }
+
+    /* Status Styles */
+    .status-selesai {
+      background-color: #d4edda !important;
+      color: #155724 !important;
+      font-weight: 700;
+      border-radius: 6px;
+      padding: 6px 8px;
+    }
+
+    .status-belum {
+      background-color: #f8d7da !important;
+      color: #721c24 !important;
+      font-weight: 700;
+      border-radius: 6px;
+      padding: 6px 8px;
+    }
+
+    /* Foto Styles */
+    .foto-cell img {
+      width: 44px;
+      height: 44px;
+      cursor: pointer;
+      border-radius: 10px;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
+      object-fit: cover;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .foto-cell img:hover {
+      transform: scale(1.15);
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+      opacity: 0.85;
+    }
+
+    /* Action Buttons */
+    .action-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .action-buttons button {
+      padding: 8px 16px;
+      border-radius: 10px;
+      background-color: #457b9d;
+      color: white;
+      border: none;
+      font-size: 1rem;
+      cursor: pointer;
+      box-shadow: 0 4px 8px rgba(69, 123, 157, 0.5);
+      transition: background-color 0.3s ease, transform 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .action-buttons button:hover {
+      background-color: #1d3557;
+      transform: scale(1.1);
+    }
+
+    /* Responsive Adjustments */
+    @media (max-width: 768px) {
+      #map {
+        height: 320px;
+      }
+
+      #infoRoute {
+        font-size: 16px;
+      }
+
+      table, th, td {
+        font-size: 0.95rem;
+      }
+
+      .form-search input {
+        width: 100%;
+      }
+
+      .action-buttons button {
+        font-size: 0.9rem;
+        padding: 7px 14px;
+        width: 100%;
+      }
+    }
+
+    @media (max-width: 480px) {
+      #map {
+        height: 260px;
+      }
+
+      .form-search input {
+        width: 100%;
+        font-size: 0.95rem;
+      }
+
+      .form-search button {
+        font-size: 0.95rem;
+        padding: 10px 20px;
+        width: 100%;
+      }
+
+      #infoRoute {
+        font-size: 14px;
+      }
+
+      th, td {
+        padding: 10px 8px;
+        font-size: 0.85rem;
+      }
+
+      .foto-cell img {
+        width: 38px;
+        height: 38px;
+      }
+
+      .action-buttons button {
+        padding: 6px 12px;
+        font-size: 0.85rem;
+      }
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+
+  </style>
+</head>
+<body>
+
+  <h1>Petugas - Halo Merah</h1>
+  <div id="biodata" style="background-color: #fff; padding: 20px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); margin-bottom: 20px;">
+    <h3>Biodata Petugas</h3>
+    <p><strong>Email:</strong> <span id="email">-</span></p>
+    <p><strong>Password:</strong> <span id="password">-</span></p>
+  </div>
+    <!-- Tombol Logout -->
+    <button onclick="logout()" style="padding: 10px 20px; background-color: red; color: white; border: none; border-radius: 4px; cursor: pointer;">
+        Logout
+    </button>
+  <div class="form-search">
+    <h3>Pencarian Lokasi</h3>
+    <form id="searchForm">
+      <input type="text" id="locationInput" placeholder="" required>
+      <button type="submit">Cari Rute</button>
+      <button type="button" id="navigasi">Mulai</button>
+    </form>
+  </div>
+
+  <div id="map"></div>
+
+  <div id="infoRoute">
+    <!-- Info jarak dan waktu akan tampil di sini -->
+  </div>
+
+  <div class="table-container">
+    <table id="laporanTable">
+      <thead>
+        <tr>
+          <th>Waktu</th>
+          <th>Lokasi</th>
+          <th>Catatan</th>
+          <th>Jenis Permasalahan</th>
+          <th>Username</th>
+          <th>Status</th>
+          <th>Foto</th>
+          <th>Aksi</th> <!-- Kolom Aksi untuk tombol-tombol -->
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Data laporan akan masuk di sini -->
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-database.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-auth.js"></script>
+
+  <!-- Google Maps -->
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDBmB3ffMDy0uRCSMLL0cCIrjqRWdWOMF4"></script>
+
+  <script>
+    // Firebase config
+    var firebaseConfig = {
+      apiKey: "AIzaSyARIl9jxFBTQ__EqSs6tLXuA6E2Y6vSxGI",
+      authDomain: "halo-merah.firebaseapp.com",
+      databaseURL: "https://halo-merah-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "halo-merah",
+      storageBucket: "halo-merah.appspot.com",
+      messagingSenderId: "228951531440",
+      appId: "1:228951531440:web:481e8c884457ac20938075",
+      measurementId: "G-Z6H4NV9PQ6"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+    const laporanRef = database.ref('laporan');
+  
+    let laporanDataAll = {};
+
+
+    function loadAkunPetugas(userId) {
+    const petugasRef = database.ref('petugas/' + userId); // Path database kamu
+
+    petugasRef.once('value', function(snapshot) {
+        const data = snapshot.val();
+
+        if (data) {
+        document.getElementById('email').textContent = data.email || '-';
+        document.getElementById('password').textContent = data.password || '-';
+        } else {
+        console.log('Data petugas tidak ditemukan.');
+        }
+    });
+    }
+    function logout() {
+    firebase.auth().signOut()
+        .then(function() {
+        alert("Berhasil logout!");
+        window.location.href = "index.html"; // Ganti ke halaman login kamu
+        })
+        .catch(function(error) {
+        console.error("Error saat logout:", error);
+        });
+    }
+
+
+        // Pastikan ini dijalankan setelah pengguna login
+        firebase.auth().onAuthStateChanged(function(user) {
+        if (user) {
+            loadAkunPetugas(user.uid);
+        } else {
+            console.log("Belum login.");
+        }
+        });
+
+
+    // Memuat laporan secara real-time
+    function loadLaporan() {
+      laporanRef.on('value', function(snapshot) {
+        laporanDataAll = snapshot.val() || {};
+        renderLaporan();
+      });
+    }
+  
+    function renderLaporan() {
+  const tableBody = document.getElementById('laporanTable').getElementsByTagName('tbody')[0];
+  tableBody.innerHTML = '';
+
+  let foundLaporan = false; // Untuk mengecek apakah ada laporan yang ditampilkan
+
+  for (let id in laporanDataAll) {
+    const laporan = laporanDataAll[id];
+    let laporanStatus = (laporan.Status || "").toLowerCase(); // Gunakan field Status untuk filter
+
+    // Menampilkan laporan yang statusnya "Sedang Diproses" atau "Petugas Menuju Lokasi"
+    if (laporanStatus !== 'sedang diproses' && laporanStatus !== 'petugas menuju lokasi') continue;
+
+    foundLaporan = true; // Ada laporan yang ditemukan
+
+    const row = tableBody.insertRow();
+
+    // Menambahkan kolom waktu berdasarkan timestamp
+    const waktuCell = row.insertCell(0);
+    const timestamp = laporan.timestamp; // Anggap laporan.Waktu berisi timestamp
+
+    if (timestamp) {
+      const date = new Date(timestamp); // Mengkonversi timestamp ke objek Date
+
+      // Cek jika tanggal tidak valid
+      if (isNaN(date.getTime())) {
+        waktuCell.textContent = 'Invalid Date'; // Jika timestamp tidak valid
+      } else {
+        // Format waktu menjadi DD/MM/YYYY HH:mm:ss
+        const formattedDate = `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getFullYear()} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}:${date.getSeconds().toString().padStart(2, '0')}`;
+        waktuCell.textContent = formattedDate; // Menampilkan waktu dalam format DD/MM/YYYY HH:mm:ss
+      }
+    } else {
+      waktuCell.textContent = '-';
+    }
+
+    const lokasiCell = row.insertCell(1);
+    lokasiCell.textContent = laporan.Location || '-';
+
+    const catatanCell = row.insertCell(2);
+    catatanCell.textContent = laporan["Catatan Permasalahan"] || '-';
+
+    const jenisCell = row.insertCell(3);
+    jenisCell.textContent = laporan["Jenis Permasalahan"] || '-';
+
+    const usernameCell = row.insertCell(4);
+    usernameCell.textContent = laporan.Username || '-';
+
+    const statusCell = row.insertCell(5);
+    statusCell.textContent = laporan.Status || '-'; // Gunakan field Status untuk status
+    statusCell.id = `status-${id}`; // Menambahkan ID agar bisa diupdate nanti
+    statusCell.classList.add(laporanStatus === 'sedang diproses' ? 'status-belum' : 'status-diproses');
+
+    const fotoCell = row.insertCell(6);
+    if (laporan.fotoK) {
+      const img = document.createElement('img');
+      img.src = laporan.fotoK;
+      img.alt = 'Foto Laporan';
+      img.style.width = '30px';  // Ukuran gambar kecil
+      img.style.height = '30px'; // Ukuran gambar kecil
+      img.style.cursor = 'pointer';
+      img.onclick = function() {
+        window.open(laporan.fotoK, '_blank');
+      };
+      fotoCell.appendChild(img);
+    } else {
+      fotoCell.textContent = '-'; // Jika tidak ada foto
+    }
+
+    // Kolom aksi dengan beberapa tombol
+    const aksiCell = row.insertCell(7);
+
+   const salinButton = document.createElement('button');
+salinButton.textContent = 'Salin Lokasi';
+salinButton.onclick = function() {
+  const lokasi = laporan.Location;
+  if (lokasi) {
+    const locationInput = document.getElementById('locationInput');
+    if (locationInput) {
+      locationInput.value = lokasi;
+      // Jika ada event listener yang perlu dipicu, misal:
+      // locationInput.dispatchEvent(new Event('input'));
+    }
+    alert('Lokasi sudah dimasukkan ke kolom pencarian!');
+  } else {
+    alert('Lokasi tidak tersedia.');
+  }
+};
+
+
+
+    const selesaiButton = document.createElement('button');
+    selesaiButton.textContent = 'Selesai';
+    selesaiButton.onclick = function() {
+      // Periksa apakah status laporan adalah "Sedang Diproses" atau "Petugas Menuju Lokasi"
+      if (laporanStatus === 'petugas menuju lokasi') {
+        laporanRef.child(id).update({
+          Status: 'Laporan Selesai'
+        }).then(() => {
+          alert('Laporan telah diselesaikan!');
+          loadLaporan();  // Memperbarui tabel setelah status diubah
+        });
+      }
+    };
+
+    const tanganiButton = document.createElement('button');
+    tanganiButton.textContent = 'Tangani';
+    tanganiButton.onclick = function() {
+      const laporanId = id;
+      const telepon = laporan.Telepon; // Nomor telepon dari laporan
+
+      const waktu = row.cells[0].textContent || '-';  // Ambil Waktu dari cell pertama
+      const lokasi = row.cells[1].textContent || '-';  // Ambil Lokasi dari cell kedua
+      const catatanPermasalahan = row.cells[2].textContent || '-';  // Ambil Catatan dari cell ketiga
+      const jenisPermasalahan = row.cells[3].textContent || '-';  // Ambil Jenis Permasalahan dari cell keempat
+      const username = row.cells[4].textContent || '-';  // Ambil Username dari cell kelima
+      const statusLaporan = row.cells[5].textContent || '-';  // Ambil Status dari cell keenam
+      const fotoUrl = row.cells[6]?.querySelector('img')?.src || '-';  // Ambil Foto URL dari cell ketujuh
+
+      // Lokasi yang akan dibuatkan link
+      const latitude = laporan.latitude || '';  // Ambil latitude dari laporan
+      const longitude = laporan.longitude || '';  // Ambil longitude dari laporan
+
+      // Buat link lokasi
+      let lokasiUrl = '-';
+      if (latitude && longitude) {
+        lokasiUrl = `https://www.google.com/maps?q=${latitude},${longitude}`;
+      } else if (lokasi !== '-') {
+        lokasiUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(lokasi)}`;
+      }
+
+      // Update status laporan ke "Petugas Menuju Lokasi" di Firebase dulu
+      laporanRef.child(laporanId).update({
+        Status: 'Petugas Menuju Lokasi'
+      }).then(() => {
+        // Susun pesan untuk WhatsApp setelah update status berhasil
+        let pesan = `Halo, Dari Petugas Halo Merah.\n\n` +
+                    `Kami telah menerima laporan Anda dan saat ini petugas sedang menuju ke lokasi.\n\n` +
+                    `Berikut detail laporan Anda:\n\n` +
+                    `⏰ Waktu: ${waktu}\n` +
+                    `🚨 Status: Petugas Menuju Lokasi\n` + // Gunakan status baru
+                    `👤 Username: ${username}\n` +
+                    `🛠 Jenis Permasalahan: ${jenisPermasalahan}\n` +
+                    `📝 Catatan Permasalahan: ${catatanPermasalahan}\n` +
+                    `📍 Lokasi: ${lokasiUrl}\n` +
+                    `📷 Foto Laporan: ${fotoUrl}\n\n` +
+                    `Mohon tetap tenang dan ikuti arahan lebih lanjut.\n\nTerima kasih. 🙏`;
+
+        // Encode pesan supaya aman
+        pesan = encodeURIComponent(pesan);
+
+        if (telepon) {
+          const waUrl = `https://api.whatsapp.com/send?phone=${telepon}&text=${pesan}`;
+          window.open(waUrl, '_blank');
+        } else {
+          alert('Nomor telepon tidak tersedia.');
+        }
+
+        // Update tampilan status di tabel (optional)
+        const statusCell = document.getElementById(`status-${laporanId}`);
+        if (statusCell) {
+          statusCell.textContent = 'Petugas Menuju Lokasi';
+          statusCell.classList.remove('status-belum', 'status-diproses');
+          statusCell.classList.add('status-diproses');
+        }
+      }).catch((error) => {
+        alert('Gagal mengupdate status laporan: ' + error.message);
+      });
+    };
+
+    aksiCell.appendChild(salinButton);
+    aksiCell.appendChild(selesaiButton);
+    aksiCell.appendChild(tanganiButton);
+  }
+
+  // Jika tidak ada laporan yang ditemukan
+  if (!foundLaporan) {
+    const noDataRow = tableBody.insertRow();
+    const noDataCell = noDataRow.insertCell(0);
+    noDataCell.colSpan = 8;  // Jumlah kolom total, 7 data + 1 aksi
+    noDataCell.textContent = 'Tidak ada laporan dengan status "Sedang Diproses" atau "Petugas Menuju Lokasi".';
+  }
+}
+
+    // Google Maps
+    let map;
+let directionsService;
+let directionsRenderer;
+
+
+function initMap() {
+    const defaultLocation = { lat: -2.5952409905064413, lng: 140.625314489007 }; // Titik dari Jl. Raya Sentani - Waena
+
+    map = new google.maps.Map(document.getElementById('map'), {
+        zoom: 14,
+        center: defaultLocation
+    });
+
+    directionsService = new google.maps.DirectionsService();
+    directionsRenderer = new google.maps.DirectionsRenderer({ map: map });
+
+    // Marker tetap di titik A
+    new google.maps.Marker({
+        position: defaultLocation,
+        map: map,
+        title: "Titik A (Tetap)"
+    });
+
+    // Klik peta untuk membuat rute ke titik B
+    map.addListener("click", function (event) {
+        const destination = event.latLng;
+
+        directionsService.route({
+            origin: defaultLocation,
+            destination: destination,
+            travelMode: google.maps.TravelMode.DRIVING
+        }, function (response, status) {
+            if (status === google.maps.DirectionsStatus.OK) {
+                directionsRenderer.setDirections(response);
+            } else {
+                alert("Rute gagal: " + status);
+            }
+        });
+    });
+}
+
+
+// Event listener untuk mencari rute saat form disubmit
+document.getElementById('searchForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+    const lokasiInput = document.getElementById('locationInput').value;
+
+    if (lokasiInput) {
+        const userLocation = lokasiInput.split(',');
+        const destination = new google.maps.LatLng(parseFloat(userLocation[0]), parseFloat(userLocation[1]));
+        const origin = new google.maps.LatLng(-2.5952409905064413, 140.625314489007); // Lokasi saat ini (misalnya Jayapura)
+
+        const request = {
+            origin: origin,
+            destination: destination,
+            travelMode: google.maps.TravelMode.DRIVING
+        };
+
+        directionsService.route(request, function(result, status) {
+            if (status === 'OK') {
+                directionsRenderer.setDirections(result);
+                const route = result.routes[0].legs[0];
+                const infoRoute = `Jarak: ${route.distance.text}, Waktu: ${route.duration.text}`;
+                document.getElementById('infoRoute').textContent = infoRoute; // Menampilkan info rute
+
+                // Menampilkan tombol navigasi setelah rute selesai
+                document.getElementById('navigasi').style.display = 'block';
+
+                // Menambahkan event listener untuk tombol navigasi
+                document.getElementById('navigasi').onclick = function() {
+                    // URL untuk membuka aplikasi Google Maps dengan rute navigasi
+                    const startUrl = `https://www.google.com/maps/dir/?api=1&origin=${origin.lat()},${origin.lng()}&destination=${destination.lat()},${destination.lng()}&travelmode=driving`;
+                    window.open(startUrl, '_blank'); // Membuka Google Maps di tab baru
+                };
+            }
+        });
+    }
+});
+        // Memuat laporan ketika halaman pertama kali dimuat
+        window.onload = function() {
+        loadLaporan();
+        initMap();
+        };
+
+
+</script>
+</body>
+</html>

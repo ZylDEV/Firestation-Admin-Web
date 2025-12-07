@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analisis Data Laporan</title>
+    <style>
+         body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            background-color: #f4f4f4;
+        }
+
+        .sidebar {
+            width: 200px;
+            background-color: #333;
+            color: white;
+            padding: 20px;
+            height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .sidebar h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .sidebar ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .sidebar ul li {
+            margin-bottom: 10px;
+        }
+
+        .sidebar ul li a {
+            color: white;
+            text-decoration: none;
+            display: block;
+            padding: 10px;
+            background-color: #444;
+            border-radius: 5px;
+        }
+
+        .sidebar ul li a:hover {
+            background-color: #555;
+        }
+
+        .main-content {
+            flex-grow: 1;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .content {
+            background: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+
+        canvas {
+            display: block;
+            margin: 20px auto;
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h2>PUSAT KELOLA</h2>
+        <ul>
+            <li><a href="dashboard.html">Dashboard</a></li>
+            <li><a href="admin.html">Admin</a></li>
+            <li><a href="petugas.html">Petugas</a></li>
+            <li><a href="user.html">User</a></li>
+            <li><a href="laporan.html">Laporan</a></li>
+            <li><a href="uploadberita.html">Upload Berita</a></li>
+            <li><a href="chrt.html">Chart Laporan</a></li>
+          
+
+        </ul>
+    </div>
+
+    <div class="main-content">  
+        <div>
+            <!-- Filter data -->
+            <label for="jenisPermasalahanFilter">Jenis Permasalahan: </label>
+            <select id="jenisPermasalahanFilter">
+                <option value="">Semua</option>
+                <option value="Darurat Bencana Alam">Darurat Bencana Alam</option>
+                <option value="Darurat Kebakaran">Darurat Kebakaran</option>
+                <option value="Darurat Keselamatan">Darurat Keselamatan</option>
+                <option value="Pertolongan Lainnya">Pertolongan Lainnya</option>
+            </select>
+    
+            <label for="bulanMulaiFilter">Bulan Mulai: </label>
+            <select id="bulanMulaiFilter">
+                <option value="">Semua</option>
+                <option value="Januari">Januari</option>
+                <option value="Februari">Februari</option>
+                <option value="Maret">Maret</option>
+                <option value="April">April</option>
+                <option value="Mei">Mei</option>
+                <option value="Juni">Juni</option>
+                <option value="Juli">Juli</option>
+                <option value="Agustus">Agustus</option>
+                <option value="September">September</option>
+                <option value="Oktober">Oktober</option>
+                <option value="November">November</option>
+                <option value="Desember">Desember</option>
+            </select>
+    
+            <label for="bulanSelesaiFilter">Bulan Selesai: </label>
+            <select id="bulanSelesaiFilter">
+                <option value="">Semua</option>
+                <option value="Januari">Januari</option>
+                <option value="Februari">Februari</option>
+                <option value="Maret">Maret</option>
+                <option value="April">April</option>
+                <option value="Mei">Mei</option>
+                <option value="Juni">Juni</option>
+                <option value="Juli">Juli</option>
+                <option value="Agustus">Agustus</option>
+                <option value="September">September</option>
+                <option value="Oktober">Oktober</option>
+                <option value="November">November</option>
+                <option value="Desember">Desember</option>
+            </select>
+    
+            <button onclick="loadLaporan()">Tampilkan Laporan</button>
+            <button onclick="downloadPDF()">Download PDF</button>
+        </div>
+    
+        <table id="laporanTable">
+            <!-- Data laporan akan dimasukkan di sini -->
+        </table>
+    
+        <canvas id="laporanChart"></canvas>
+        <canvas id="laporanBulanChart"></canvas>
+    </div>
+    
+    </style>
+</head>
+    
+    <script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-auth.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.0.1/chart.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.26/jspdf.plugin.autotable.min.js"></script>
+
+    <script>
+        // Konfigurasi Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyARIl9jxFBTQ__EqSs6tLXuA6E2Y6vSxGI",
+            authDomain: "halo-merah.firebaseapp.com",
+            databaseURL: "https://halo-merah-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "halo-merah",
+            storageBucket: "halo-merah.appspot.com",
+            messagingSenderId: "228951531440",
+            appId: "1:228951531440:web:481e8c884457ac20938075",
+            measurementId: "G-Z6H4NV9PQ6"
+        };
+        // Inisialisasi Firebase
+        firebase.initializeApp(firebaseConfig);
+const database = firebase.database();
+
+function getMonthNumber(bulanNama) {
+    const bulanMap = {
+        "Januari": 0, "Februari": 1, "Maret": 2, "April": 3,
+        "Mei": 4, "Juni": 5, "Juli": 6, "Agustus": 7,
+        "September": 8, "Oktober": 9, "November": 10, "Desember": 11
+    };
+    return bulanMap[bulanNama] ?? -1;
+}
+
+function loadLaporan() {
+    const laporanRef = database.ref('laporan');
+    const laporanTable = document.getElementById('laporanTable');
+    const jenisPermasalahanFilter = document.getElementById('jenisPermasalahanFilter')?.value ?? "";
+    const bulanMulaiFilter = document.getElementById('bulanMulaiFilter')?.value ?? "";
+    const bulanSelesaiFilter = document.getElementById('bulanSelesaiFilter')?.value ?? "";
+
+    let laporanData = {
+        "Darurat Bencana Alam": 0,
+        "Darurat Kebakaran": 0,
+        "Darurat Keselamatan": 0,
+        "Pertolongan Lainnya": 0
+    };
+
+    let laporanBulanData = {};
+
+    laporanRef.once('value', (snapshot) => {
+        snapshot.forEach((childSnapshot) => {
+            let laporan = childSnapshot.val();
+            let jenisPermasalahan = laporan["Jenis Permasalahan"]?.trim() ?? "";
+            let timestamp = laporan.timestamp;
+
+            if (!timestamp || isNaN(timestamp)) {
+                console.warn("⛔ Timestamp tidak valid:", timestamp);
+                return;
+            }
+
+            let tanggal = new Date(parseInt(timestamp));
+            let bulanNama = tanggal.toLocaleString('id-ID', { month: 'long' });
+            let bulanIndex = tanggal.getMonth();
+
+            // Filter jenis permasalahan
+            if (jenisPermasalahanFilter && jenisPermasalahan !== jenisPermasalahanFilter) {
+                return;
+            }
+
+            // Filter bulan mulai dan bulan selesai
+            if (bulanMulaiFilter && bulanSelesaiFilter) {
+                let bulanMulai = getMonthNumber(bulanMulaiFilter);
+                let bulanSelesai = getMonthNumber(bulanSelesaiFilter);
+                if (bulanMulai === -1 || bulanSelesai === -1 || bulanIndex < bulanMulai || bulanIndex > bulanSelesai) {
+                    return;
+                }
+            }
+
+            // Hitung data per jenis
+            if (laporanData.hasOwnProperty(jenisPermasalahan)) {
+                laporanData[jenisPermasalahan]++;
+            } else {
+                laporanData[jenisPermasalahan] = 1; // jika jenis baru muncul
+            }
+
+            // Hitung data per bulan
+            laporanBulanData[bulanNama] = (laporanBulanData[bulanNama] || 0) + 1;
+        });
+        let totalSemua = Object.values(laporanData).reduce((a, b) => a + b, 0);
+
+        // Tampilkan tabel
+        laporanTable.innerHTML = Object.entries(laporanData).map(
+    ([jenis, jumlah]) => `<tr><td>${jenis}</td><td>${jumlah}</td></tr>`).join('') + `<tr style="font-weight:bold;"><td>Total</td><td>${totalSemua}</td></tr>`;
+
+        generateChart(laporanData, 'laporanChart', 'Jumlah Laporan per Jenis');
+        generateChart(laporanBulanData, 'laporanBulanChart', 'Jumlah Laporan per Bulan');
+    });
+}
+
+
+// Fungsi untuk menghasilkan grafik menggunakan Chart.js
+function generateChart(data, canvasId, label) {
+    const ctx = document.getElementById(canvasId).getContext('2d');
+
+    if (window.chartInstances && window.chartInstances[canvasId]) {
+        window.chartInstances[canvasId].destroy();
+    }
+
+    const chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: Object.keys(data),
+            datasets: [{
+                label: label,
+                data: Object.values(data),
+                backgroundColor: 'rgba(75, 192, 192, 0.6)'
+            }]
+        }
+    });
+
+    if (!window.chartInstances) window.chartInstances = {};
+    window.chartInstances[canvasId] = chart;
+}
+
+// Fungsi untuk mengekspor data laporan ke PDF
+function exportToPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    // Membuat auto-table
+    doc.autoTable({
+        head: [['Jenis Permasalahan', 'Jumlah']],
+        body: Object.entries(laporanData).map(([jenis, jumlah]) => [jenis, jumlah]),
+    });
+
+    // Menyimpan PDF
+    doc.save('laporan.pdf');
+}
+
+
+
+
+function downloadPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF('p', 'mm', 'a4');
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const margin = 14;
+    const laporanTable = document.getElementById('laporanTable');
+    const rows = laporanTable.rows;
+
+    const tanggalCetak = new Date().toLocaleDateString('id-ID', {
+        day: 'numeric', month: 'long', year: 'numeric'
+    });
+
+    // Ambil nilai filter bulan mulai dan bulan selesai
+    const bulanMulai = document.getElementById('bulanMulaiFilter').value;
+    const bulanSelesai = document.getElementById('bulanSelesaiFilter').value;
+
+    const bulanMulaiText = bulanMulai ? bulanMulai : "Semua Bulan";
+    const bulanSelesaiText = bulanSelesai ? bulanSelesai : "Semua Bulan";
+    
+
+    // =========================
+    // HEADER
+    // =========================
+    doc.setFontSize(12);
+    doc.setFont(undefined, 'bold');
+    doc.text("HALO MERAH", margin, 20);
+    doc.setFontSize(10);
+    doc.setFont(undefined, 'normal');
+    doc.text("Sistem Layanan Darurat Kota Jayapura", margin, 26);
+
+    // Judul Laporan
+    doc.setFontSize(14);
+    doc.setFont(undefined, 'bold');
+    doc.text('LAPORAN REKAPITULASI PERMASALAHAN MASYARAKAT', pageWidth / 2, 40, { align: 'center' });
+
+    doc.setFontSize(11);
+    doc.setFont(undefined, 'normal');
+    doc.text(`Nomor: 001/CAPEK/IV/2025`, margin, 50);
+    doc.text(`Tanggal: ${tanggalCetak}`, margin, 56);
+
+    // =========================
+    // PENDAHULUAN (Justified)
+    // =========================
+    const pendahuluan = `
+    Laporan ini disusun sebagai dokumentasi resmi dari sistem HALO MERAH mengenai permasalahan yang dilaporkan oleh masyarakat Kota Jayapura. 
+Tujuan dari laporan ini adalah untuk memberikan informasi mengenai jenis permasalahan yang sering terjadi dan frekuensi pelaporannya selama periode ${bulanMulaiText} sampai ${bulanSelesaiText}. 
+Dengan adanya laporan ini, pihak berwenang diharapkan dapat mengambil langkah preventif maupun tindakan penanganan yang lebih optimal di kemudian hari.
+    `;
+
+    const lines = doc.splitTextToSize(pendahuluan.trim(), pageWidth - margin * 2);
+    doc.text(lines, margin, 68);
+
+    // =========================
+    // TABEL DATA
+    // =========================
+    // Ambil data dari tabel HTML
+const dataRows = Array.from(rows).map((row, index) => [
+    index + 1,
+    row.cells[0].innerText,
+    row.cells[1].innerText
+]);
+
+
+
+// Tampilkan tabel di PDF
+doc.autoTable({
+    startY: 68 + lines.length * 5 - 2,
+    head: [['No', 'Jenis Permasalahan', 'Jumlah']],
+    body: dataRows,
+    styles: {
+        halign: 'center',
+        valign: 'middle',
+        fontSize: 10
+    },
+    headStyles: {
+        fillColor: [100, 149, 237]
+    },
+    columnStyles: {
+        1: { halign: 'left' },  // Jenis Permasalahan rata kiri
+        2: { halign: 'center' } // Jumlah rata tengah
+    },
+    theme: 'grid',
+    didDrawCell: function (data) {
+        // Menambahkan teks tebal untuk baris total
+        if (data.row.index === data.table.body.length - 1) {
+            doc.setFont(undefined, 'bold');
+        }
+    }
+});
+
+    // =========================
+    // CHART (Diagram Batang)
+    // =========================
+    const chartCanvas = document.getElementById('laporanChart');
+    if (chartCanvas) {
+        const chartImage = chartCanvas.toDataURL('image/png', 1.0);
+        const chartY = doc.lastAutoTable.finalY + 10;
+        doc.setFontSize(11);
+        doc.text("Diagram Jumlah Laporan Berdasarkan Jenis Permasalahan", pageWidth / 2, chartY, { align: 'center' });
+        doc.addImage(chartImage, 'PNG', margin, chartY + 5, pageWidth - margin * 2, 70);
+    }
+
+    // =========================
+    // PENUTUP
+    // =========================
+    const penutupY = (doc.lastAutoTable?.finalY || 170) + 90;
+    const penutup = `
+Demikian laporan ini disusun sebagai bentuk transparansi pelayanan darurat kepada masyarakat. 
+Kami berharap informasi ini dapat digunakan sebagai bahan evaluasi dan peningkatan pelayanan di masa mendatang. Atas perhatian dan kerja sama semua pihak, kami ucapkan terima kasih.
+    `;
+
+    const penutupLines = doc.splitTextToSize(penutup.trim(), pageWidth - margin * 2);
+    doc.text(penutupLines, margin, penutupY);
+
+    // =========================
+    // TANDA TANGAN
+    // =========================
+    const ttdY = penutupY + penutupLines.length * 5 + 5; // Menambahkan sedikit jarak tambahan untuk memastikan teks tidak terlalu rapat
+
+    // Set font untuk teks
+    doc.setFontSize(11);
+
+    // Menambahkan teks tanggal
+    doc.text(`Jayapura, ${tanggalCetak}`, pageWidth - margin - 60, ttdY);
+
+    // Menambahkan teks "Disetujui oleh,"
+    doc.text("Disetujui oleh,", pageWidth - margin - 60, ttdY + 5);
+
+    // Menyediakan ruang untuk tanda tangan
+    doc.text("______________________________", pageWidth - margin - 60, ttdY + 30);
+
+    // Menyimpan PDF dengan nama file yang disesuaikan
+    doc.save(`laporan_rekapitulasi_${bulanMulaiText}_${bulanSelesaiText}.pdf`);
+}
+
+
+
+    // Pastikan load data setelah DOM siap
+    window.addEventListener('DOMContentLoaded', loadLaporan);
+
+
+</script>
+</body>
+</html>

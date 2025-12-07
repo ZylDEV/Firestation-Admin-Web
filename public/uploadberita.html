@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pusat Kelola</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+        }
+
+        .sidebar {
+            width: 200px;
+            background-color: #333;
+            color: white;
+            padding: 20px;
+            height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .sidebar h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .sidebar ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .sidebar ul li {
+            margin-bottom: 10px;
+        }
+
+        .sidebar ul li a {
+            color: white;
+            text-decoration: none;
+            display: block;
+            padding: 10px;
+            background-color: #444;
+            border-radius: 5px;
+        }
+
+        .sidebar ul li a:hover {
+            background-color: #555;
+        }
+
+        .main-content {
+            flex-grow: 1;
+            padding: 20px;
+        }
+
+        .content {
+            background: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            padding-right: 40px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        .form-group button {
+            background: #3498db;
+            color: #fff;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .form-group button:hover {
+            background: #2980b9;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h2>PUSAT KELOLA</h2>
+        <ul>
+            <li><a href="dashboard.html">Dashboard</a></li>
+            <li><a href="admin.html">Admin</a></li>
+            <li><a href="petugas.html">Petugas</a></li>
+            <li><a href="user.html">User</a></li>
+            <li><a href="laporan.html">Laporan</a></li>
+            <li><a href="uploadberita.html">Upload Berita</a></li>
+            <li><a href="chrt.html">Chart Laporan</a></li>
+            <!-- Add more sidebar items here -->
+        </ul>
+    </div>
+    <div class="main-content">
+        <div class="content">
+            <h1>Upload Foto dan Catatan</h1>
+            <form id="uploadForm">
+                <div class="form-group">
+                    <label for="photo">Pilih Foto:</label>
+                    <input type="file" id="photo" accept="image/*" required>
+                </div>
+                <div class="form-group">
+                    <label for="note">Catatan:</label>
+                    <textarea id="note" placeholder="Masukkan catatan..." rows="4" required></textarea>
+                </div>
+                <div class="form-group">
+                    <button type="submit">Upload</button>
+                </div>
+            </form>
+            <p id="status"></p> <!-- Status akan ditampilkan di sini -->
+            <p id="message" style="font-weight: bold;"></p> <!-- Pesan untuk status berhasil/gagal -->
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-storage.js"></script>
+
+    <script>
+        // Konfigurasi Firebase
+        var firebaseConfig = {
+            apiKey: "AIzaSyARIl9jxFBTQ__EqSs6tLXuA6E2Y6vSxGI",
+            authDomain: "halo-merah.firebaseapp.com",
+            databaseURL: "https://halo-merah-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "halo-merah",
+            storageBucket: "halo-merah.appspot.com",
+            messagingSenderId: "228951531440",
+            appId: "1:228951531440:web:481e8c884457ac20938075",
+            measurementId: "G-Z6H4NV9PQ6"
+        };
+
+        // Inisialisasi Firebase
+        firebase.initializeApp(firebaseConfig);
+        var storage = firebase.storage();
+        var database = firebase.database();
+
+        // Fungsi untuk upload foto dan catatan
+        document.getElementById('uploadForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            var file = document.getElementById('photo').files[0]; // Ambil file foto
+            var note = document.getElementById('note').value; // Ambil catatan
+            var storageRef = storage.ref('images/'); // Referensi ke Storage untuk menyimpan foto
+
+            // Tampilkan pesan status sedang mengupload
+            document.getElementById('status').textContent = 'Mengupload file...';
+            document.getElementById('message').textContent = ''; // Reset pesan sebelumnya
+
+            // Upload foto ke Firebase Storage
+            var uploadTask = storageRef.put(file);
+
+            // Mendapatkan progress upload
+            uploadTask.on('state_changed', function (snapshot) {
+                // Perhitungan progress upload dalam persen
+                var progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                document.getElementById('status').textContent = 'Progress: ' + progress.toFixed(2) + '%';
+            }, function (error) {
+                // Jika ada error saat upload
+                document.getElementById('status').textContent = 'Error mengupload file: ' + error.message;
+                document.getElementById('message').textContent = 'Gagal mengupload foto, silakan coba lagi.'; // Pesan gagal
+                // Kembali ke Dashboard setelah gagal upload
+                window.location.href = 'Dashboard.html'; 
+            }, function () {
+                // Setelah upload selesai, dapatkan URL file
+                uploadTask.snapshot.ref.getDownloadURL().then(function (downloadURL) {
+                    // Siapkan data untuk disimpan ke Realtime Database
+                    var data = {
+                        photoURL: downloadURL, // URL foto yang diunggah
+                        note: note, // Catatan yang diinput pengguna
+                        timestamp: Date.now() // Waktu upload
+                    };
+
+                    // Simpan data ke node 'uploads' di Realtime Database
+                    database.ref('uploads').push(data, function (error) {
+                        if (error) {
+                            document.getElementById('status').textContent = 'Gagal menyimpan data ke database: ' + error.message;
+                            document.getElementById('message').textContent = 'Gagal menyimpan catatan, silakan coba lagi.'; // Pesan gagal
+                        } else {
+                            document.getElementById('status').textContent = 'Data berhasil diupload ke database!';
+                            document.getElementById('message').textContent = 'Catatan berhasil disimpan!'; // Pesan berhasil
+                        }
+
+                        // Kembali ke Dashboard setelah upload
+                        window.location.href = 'Dashboard.html'; 
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>

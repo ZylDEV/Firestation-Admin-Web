@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="id">
+    <style>
+    * {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-image: url('pot.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+}
+
+.container {
+  background: rgba(255, 255, 255, 0.95);
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 12px 20px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 400px;
+  backdrop-filter: blur(10px);
+}
+
+.container h2 {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  color: #222;
+  font-size: 1.8rem;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.password-container {
+  position: relative;
+}
+
+input, select {
+  padding: 0.75rem 1rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  width: 100%;
+}
+
+input:focus, select:focus {
+  outline: none;
+  border-color: #2575fc;
+  box-shadow: 0 0 0 2px rgba(37, 117, 252, 0.2);
+}
+
+.toggle-password {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  cursor: pointer;
+  font-size: 1rem;
+  color: #888;
+}
+
+button {
+  padding: 0.75rem;
+  background-color: #2575fc;
+  color: white;
+  font-weight: bold;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #1a5ed9;
+}
+
+.error-message {
+  color: #e63946;
+  text-align: center;
+  font-size: 0.9rem;
+  font-weight: bold;
+}
+
+/* Media queries for responsiveness */
+@media (max-width: 768px) {
+  .container {
+    padding: 1.5rem;
+    max-width: 100%;
+  }
+
+  .container h2 {
+    font-size: 1.5rem;
+  }
+
+  input, select {
+    font-size: 0.95rem;
+  }
+
+  button {
+    padding: 0.7rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 1rem;
+    max-width: 100%;
+  }
+
+  .container h2 {
+    font-size: 1.3rem;
+  }
+
+  input, select {
+    font-size: 0.9rem;
+  }
+
+  button {
+    padding: 0.6rem;
+  }
+}
+
+    </style>       
+</head>
+<body>
+    <div class="container">
+        <h2 id="formTitle">Login</h2>
+        <div id="errorMessage" class="error-message"></div>
+        <form id="authForm">
+          <input type="email" id="email" placeholder="Email" required>
+    
+          <div class="password-container">
+            <input type="text" id="password" placeholder="Password" required>
+            <span id="togglePassword" class="toggle-password">🙈</span>
+          </div>
+    
+          <select id="role" required>
+            <option value="admin">Admin</option>
+            <option value="petugas">Petugas</option>
+          </select>
+          <button type="submit" id="authButton">Login</button>
+        </form>
+      </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-database.js"></script>
+    <script>
+      // Konfigurasi Firebase
+      var firebaseConfig = {
+        apiKey: "AIzaSyARIl9jxFBTQ__EqSs6tLXuA6E2Y6vSxGI",
+        authDomain: "halo-merah.firebaseapp.com",
+        databaseURL: "https://halo-merah-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "halo-merah",
+        storageBucket: "halo-merah.appspot.com",
+        messagingSenderId: "228951531440",
+        appId: "1:228951531440:web:481e8c884457ac20938075",
+        measurementId: "G-Z6H4NV9PQ6"
+      };
+
+      // Inisialisasi Firebase
+      firebase.initializeApp(firebaseConfig);
+
+var formTitle = document.getElementById('formTitle');
+var authButton = document.getElementById('authButton');
+var authForm = document.getElementById('authForm');
+var errorMessage = document.getElementById('errorMessage');
+
+formTitle.textContent = 'Login';
+authButton.textContent = 'Login';
+
+// Fitur Tampilkan/Sembunyikan Password
+var passwordInput = document.getElementById('password');
+var togglePassword = document.getElementById('togglePassword');
+
+togglePassword.addEventListener('click', function () {
+  if (passwordInput.type === 'text') {
+    passwordInput.type = 'password';
+    togglePassword.textContent = '🙈'; // Mata tertutup
+  } else {
+    passwordInput.type = 'text';
+    togglePassword.textContent = '👁️'; // Mata terbuka
+  }
+});
+
+// Login Logic
+authForm.addEventListener('submit', function (event) {
+  event.preventDefault();
+  var email = document.getElementById('email').value;
+  var password = document.getElementById('password').value;
+  var role = document.getElementById('role').value;
+
+  firebase.auth().signInWithEmailAndPassword(email, password)
+    .then(function (userCredential) {
+      var user = userCredential.user;
+
+      firebase.database().ref(role + '/' + user.uid).once('value', function(snapshot) {
+        if (snapshot.exists()) {
+          window.location.href = role === 'admin' ? 'dashboard.html' : 'dashboardpetugas.html';
+        } else {
+          errorMessage.textContent = 'Peran tidak cocok. Pilih peran yang sesuai.';
+          firebase.auth().signOut();
+        }
+      }).catch(function (error) {
+        console.error("Error checking role:", error);
+        errorMessage.textContent = 'Gagal memeriksa peran. Coba lagi.';
+      });
+    })
+    .catch(function (error) {
+      console.error("Login error:", error);
+      switch (error.code) {
+        case 'auth/wrong-password':
+        case 'auth/invalid-credential':
+          errorMessage.textContent = 'Email atau kata sandi salah.';
+          break;
+        case 'auth/user-not-found':
+          errorMessage.textContent = 'Akun tidak ditemukan.';
+          break;
+        case 'auth/invalid-email':
+          errorMessage.textContent = 'Email tidak valid.';
+          break;
+        case 'auth/too-many-requests':
+          errorMessage.textContent = 'Terlalu banyak percobaan. Coba lagi nanti.';
+          break;
+        default:
+          errorMessage.textContent = 'Terjadi kesalahan saat login.';
+      }
+    });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pusat Kelola</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+        }
+    
+        .sidebar {
+            width: 200px;
+            background-color: #333;
+            color: white;
+            padding: 20px;
+            height: 100vh;
+            box-sizing: border-box;
+        }
+    
+        .sidebar h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+    
+        .sidebar ul {
+            list-style-type: none;
+            padding: 0;
+        }
+    
+        .sidebar ul li {
+            margin-bottom: 10px;
+        }
+    
+        .sidebar ul li a {
+            color: white;
+            text-decoration: none;
+            display: block;
+            padding: 10px;
+            background-color: #444;
+            border-radius: 5px;
+        }
+    
+        .sidebar ul li a:hover {
+            background-color: #555;
+        }
+    
+        .main-content {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+    
+        .content {
+            background: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+    
+        .form-group {
+            margin-bottom: 15px;
+            position: relative;
+        }
+    
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+    
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            padding-right: 40px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+    
+        .form-group button {
+            background: #3498db;
+            color: #fff;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    
+        .form-group button:hover {
+            background: #2980b9;
+        }
+    
+        .toggle-password {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+        }
+    
+        .table-container {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+    
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 600px;
+        }
+    
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+    
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+    
+        th {
+            background-color: #f2f2f2;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+    </style>
+    
+</head>
+<body>
+    <div class="sidebar">
+        <h2>PUSAT KELOLA</h2>
+        <ul>
+            <li><a href="dashboard.html">Dashboard</a></li>
+            <li><a href="admin.html">Admin</a></li>
+            <li><a href="petugas.html">Petugas</a></li>
+            <li><a href="user.html">User</a></li>
+            <li><a href="laporan.html">Laporan</a></li>
+            <li><a href="uploadberita.html">Upload Berita</a></li>
+            <li><a href="chrt.html">Chart Laporan</a></li>
+        </ul>
+    </div>
+    <div class="main-content">
+        <div class="header">
+            <h1>Petugas</h1>
+        </div>
+        <div class="content">
+            <form id="petugasForm">
+                <input type="hidden" id="petugasId">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required>
+                    <span class="toggle-password" onclick="togglePassword()">👁️</span>
+                </div>
+                <div class="form-group">
+                    <button type="submit">Submit</button>
+                </div>
+            </form>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Email</th>
+                            <th>Password</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="petugasTableBody">
+                        <!-- Data akan dimuat di sini -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
+    <script>
+        // Konfigurasi Firebase
+        var firebaseConfig = {
+            apiKey: "AIzaSyARIl9jxFBTQ__EqSs6tLXuA6E2Y6vSxGI",
+            authDomain: "halo-merah.firebaseapp.com",
+            databaseURL: "https://halo-merah-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "halo-merah",
+            storageBucket: "halo-merah.appspot.com",
+            messagingSenderId: "228951531440",
+            appId: "1:228951531440:web:481e8c884457ac20938075",
+            measurementId: "G-Z6H4NV9PQ6"
+        };
+        firebase.initializeApp(firebaseConfig);
+        var db = firebase.database();
+    
+        // Referensi database ke node 'petugas'
+        var petugasRef = db.ref('petugas');
+    
+        // Load data petugas ke tabel
+        petugasRef.on('value', (snapshot) => {
+            const petugas = snapshot.val();
+            const petugasTableBody = document.getElementById('petugasTableBody');
+            petugasTableBody.innerHTML = '';
+            for (let id in petugas) {
+                const item = petugas[id];
+                const row = `
+                    <tr>
+                        <td>${item.email}</td>
+                        <td>${item.password}</td>
+                        <td>
+                            <button onclick="editPetugas('${id}')">Edit</button>
+                            <button onclick="deletePetugas('${id}')">Delete</button>
+                        </td>
+                    </tr>
+                `;
+                petugasTableBody.innerHTML += row;
+            }
+        });
+    
+        // Tambah atau Update petugas
+        document.getElementById('petugasForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const petugasId = document.getElementById('petugasId').value;
+            const petugas = {
+                email: document.getElementById('email').value,
+                password: document.getElementById('password').value,
+            };
+    
+            if (petugasId) {
+                petugasRef.child(petugasId).update(petugas);
+            } else {
+                petugasRef.push(petugas);
+            }
+    
+            document.getElementById('petugasForm').reset();
+            document.getElementById('petugasId').value = '';
+        });
+    
+        // Fungsi untuk edit data petugas
+        function editPetugas(id) {
+            petugasRef.child(id).once('value', (snapshot) => {
+                const item = snapshot.val();
+                document.getElementById('petugasId').value = id;
+                document.getElementById('email').value = item.email;
+                document.getElementById('password').value = item.password;
+            });
+        }
+    
+        // Fungsi untuk hapus data petugas
+        function deletePetugas(id) {
+            petugasRef.child(id).remove();
+        }
+    
+        // Fungsi toggle lihat/sembunyi password
+        function togglePassword() {
+            const passwordField = document.getElementById('password');
+            const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordField.setAttribute('type', type);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pusat Kelola</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+    
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden; /* Tetap */
+        }
+    
+        .sidebar {
+            width: 200px;
+            background-color: #333;
+            color: white;
+            padding: 20px;
+            height: 100vh;
+            box-sizing: border-box;
+            position: fixed;
+            left: 0;
+            top: 0;
+        }
+    
+        .sidebar h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+    
+        .sidebar ul {
+            list-style-type: none;
+            padding: 0;
+        }
+    
+        .sidebar ul li {
+            margin-bottom: 10px;
+        }
+    
+        .sidebar ul li a {
+            color: white;
+            text-decoration: none;
+            display: block;
+            padding: 10px;
+            background-color: #444;
+            border-radius: 5px;
+        }
+    
+        .sidebar ul li a:hover {
+            background-color: #555;
+        }
+    
+        .main-content {
+            margin-left: 200px;
+            padding: 20px;
+            flex-grow: 1;
+            height: auto;
+            overflow-y : auto;
+        }
+    
+        .content {
+            background: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            min-height: 100%;
+            display: flex;
+            flex-direction: column;
+            overflow: visible; /* Scroll ditiadakan di sini juga */
+        }
+    
+        .form-group {
+            margin-bottom: 15px;
+            position: relative;
+        }
+    
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+    
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            padding-right: 40px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+    
+        .form-group button {
+            background: #3498db;
+            color: #fff;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    
+        .form-group button:hover {
+            background: #2980b9;
+        }
+    
+        .form-group .toggle-password {
+            position: absolute;
+            top: 50%;
+            right: 10px;
+            transform: translateY(-50%);
+            cursor: pointer;
+        }
+    
+        .table-container {
+            max-height: 400px;
+            overflow-y: auto;
+            overflow-x: auto;
+            margin-top: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+    
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+    
+        thead th {
+            position: sticky;
+            top: 0;
+            background-color: #f2f2f2;
+            z-index: 2;
+        }
+    
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+    
+        th, td {
+            padding: 12px 16px;
+            text-align: left;
+            word-break: break-word;
+            border-bottom: 1px solid #ddd;
+        }
+    
+        tr:hover td {
+            background-color: #f9f9f9;
+        }
+    
+        th {
+            background-color: #f2f2f2;
+        }
+        td img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 5px; /* opsional, biar sudutnya agak membulat */
+        }
+
+    </style>
+    
+</head>
+<body>
+    <div class="sidebar">
+        <h2>PUSAT KELOLA</h2>
+        <ul>
+            <li><a href="dashboard.html">Dashboard</a></li>
+            <li><a href="admin.html">Admin</a></li>
+            <li><a href="petugas.html">Petugas</a></li>
+            <li><a href="user.html">User</a></li>
+            <li><a href="laporan.html">Laporan</a></li>
+            <li><a href="uploadberita.html">Upload Berita</a></li>
+            <li><a href="chrt.html">Chart Laporan</a></li>
+        </ul>
+    </div>
+    <div class="main-content">
+        <div class="header">
+            <h1>Laporan</h1>
+        </div>
+        <div class="content">
+            <form id="laporanForm">
+                <input type="hidden" id="laporanId">
+                <div class="form-group">
+                    <label for="status">Status</label>
+                    <input type="status" id="status" name="status" required>
+                </div>
+                <div class="form-group">
+                    <label for="timestamp">Waktu</label>
+                    <input type="datetime-local" id="timestamp" name="timestamp" disabled required>
+                </div>
+                <div class="form-group">
+                    <label for="fotoK">Foto Kejadian</label>
+                    <div id="fotoKPreview" style="margin-top: 5px;"></div>
+                </div>                     
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="jenis_permasalahan">Jenis Permasalahan</label>
+                    <select id="jenis_permasalahan" name="jenis_permasalahan" required>
+                        <option value="">Pilih Jenis Permasalahan</option>
+                        <option value="Darurat Bencana Alam">Darurat Bencana Alam</option>
+                        <option value="Darurat Kebakaran">Darurat Kebakaran</option>
+                        <option value="Darurat Keselamatan">Darurat Keselamatan</option>
+                        <option value="Pertolongan Lainnya">Pertolongan Lainnya</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="catatan_permasalahan">Catatan Permasalahan</label>
+                    <textarea id="catatan_permasalahan" name="catatan_permasalahan" rows="4" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="location">Lokasi</label>
+                    <input type="text" id="location" name="location" required>
+                </div>
+                <div class="form-group">
+                    <button type="submit">Submit</button>
+                </div>
+            </form>
+            <div class="sort-controls" style="margin-bottom: 15px; display: flex; gap: 10px;">
+                <!-- Filter Jenis Permasalahan -->
+                <select id="sortJenis" onchange="filterLaporan()">
+                    <option value="">Semua Jenis Permasalahan</option>
+                    <option value="Darurat Bencana Alam">Darurat Bencana Alam</option>
+                    <option value="Darurat Kebakaran">Darurat Kebakaran</option>
+                    <option value="Darurat Keselamatan">Darurat Keselamatan</option>
+                    <option value="Pertolongan Lainnya">Pertolongan Lainnya</option>
+                </select>
+            
+                <!-- Filter Bulan -->
+                <select id="sortBulan" onchange="filterLaporan()">
+                    <option value="">Semua Bulan</option>
+                    <option value="01">Januari</option>
+                    <option value="02">Februari</option>
+                    <option value="03">Maret</option>
+                    <option value="04">April</option>
+                    <option value="05">Mei</option>
+                    <option value="06">Juni</option>
+                    <option value="07">Juli</option>
+                    <option value="08">Agustus</option>
+                    <option value="09">September</option>
+                    <option value="10">Oktober</option>
+                    <option value="11">November</option>
+                    <option value="12">Desember</option>
+                </select>
+
+                <select id="statusFilter">
+                    <option value="">Semua</option>
+                    <option value="Sedang Diproses">Sedang Diproses</option>
+                    <option value="Laporan terbaru">Laporan terbaru</option>
+                    <option value="Petugas Menuju Lokasi">Petugas Menuju Lokasi</option>
+                    <option value="Laporan Selesai">Laporan Selesai</option>
+                </select>
+            
+                <!-- Total Laporan -->
+                <div id="totalCard" style="background-color: #f0f4f8; padding: 10px 20px; border-radius: 8px; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                    <span id="totalLaporan">0</span>
+                </div>
+            </div>
+            
+            
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Status</th>
+                            <th>Waktu</th>
+                            <th>Kejadian</th>
+                            <th>Email</th>
+                            <th>Jenis Permasalahan</th>
+                            <th>Catatan Permasalahan</th>
+                            <th>Lokasi</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="laporanTableBody">
+                        <!-- Data akan dimuat di sini -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
+    <script>
+        // Konfigurasi Firebase
+        var firebaseConfig = {
+            apiKey: "AIzaSyARIl9jxFBTQ__EqSs6tLXuA6E2Y6vSxGI",
+            authDomain: "halo-merah.firebaseapp.com",
+            databaseURL: "https://halo-merah-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "halo-merah",
+            storageBucket: "halo-merah.appspot.com",
+            messagingSenderId: "228951531440",
+            appId: "1:228951531440:web:481e8c884457ac20938075",
+            measurementId: "G-Z6H4NV9PQ6"
+        };
+        firebase.initializeApp(firebaseConfig);
+        var db = firebase.database();
+        var laporanRef = db.ref('laporan');
+    
+        // Fungsi untuk render laporan
+        function renderLaporan(laporans) {
+            const laporanTableBody = document.getElementById('laporanTableBody');
+            laporanTableBody.innerHTML = '';
+    
+            let laporanList = [];
+    
+            for (let id in laporans) {
+                laporanList.push({
+                    id,
+                    ...laporans[id]
+                });
+            }
+    
+            const jenisFilter = document.getElementById('sortJenis').value;
+            const bulanFilter = document.getElementById('sortBulan').value;
+            const statusFilter = document.getElementById('statusFilter').value;
+    
+            if (jenisFilter) {
+                laporanList = laporanList.filter(laporan => laporan['Jenis Permasalahan'] === jenisFilter);
+            }
+    
+            if (bulanFilter) {
+                laporanList = laporanList.filter(laporan => {
+                    const date = new Date(laporan.timestamp);
+                    return (date.getMonth() + 1).toString().padStart(2, '0') === bulanFilter;
+                });
+            }
+    
+            if (statusFilter) {
+                laporanList = laporanList.filter(laporan => laporan.Status === statusFilter);
+            }
+    
+            laporanList.sort((a, b) => b.timestamp - a.timestamp);
+    
+            laporanList.forEach(laporan => {
+                const date = new Date(laporan.timestamp);
+                const formattedTime = date.toLocaleString();
+                const row = `
+                    <tr>
+                        <td>${laporan.Status || '-'}</td>
+                        <td>${formattedTime}</td>
+                        <td>
+                            <a href="${laporan.fotoK || '#'}" target="_blank" download>
+                                <img src="${laporan.fotoK || ''}" alt="Foto" style="width:100px; height:100px; object-fit:cover; border-radius:5px;">
+                            </a>
+                        </td>
+                        <td>${laporan.Email || '-'}</td>
+                        <td>${laporan['Jenis Permasalahan'] || '-'}</td>
+                        <td>${laporan['Catatan Permasalahan'] || '-'}</td>
+                        <td>${laporan.Location || '-'}</td>
+                        <td>
+                            <button onclick="editLaporan('${laporan.id}')">Edit</button>
+                            <button onclick="deleteLaporan('${laporan.id}')">Delete</button>
+                        </td>
+                    </tr>
+                `;
+                laporanTableBody.innerHTML += row;
+            });
+    
+            const totalLaporan = document.getElementById('totalLaporan');
+            if (totalLaporan) {
+                totalLaporan.textContent = `Total Laporan: ${laporanList.length}`;
+            }
+        }
+    
+        // Listener realtime untuk laporan
+        laporanRef.on('value', (snapshot) => {
+            const laporans = snapshot.val() || {};
+            renderLaporan(laporans);
+        });
+    
+        // Fungsi untuk menyaring laporan saat filter berubah
+        function filterLaporan() {
+            laporanRef.once('value', (snapshot) => {
+                const laporans = snapshot.val() || {};
+                renderLaporan(laporans);
+            });
+        }
+    
+        // Tambahkan event listener untuk filter
+        document.getElementById('sortJenis').addEventListener('change', filterLaporan);
+        document.getElementById('sortBulan').addEventListener('change', filterLaporan);
+        document.getElementById('statusFilter').addEventListener('change', filterLaporan);
+    
+        // Fungsi submit laporan baru / update laporan
+        document.getElementById('laporanForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const laporanId = document.getElementById('laporanId').value;
+            const laporan = {
+                Email: document.getElementById('email').value,
+                'Jenis Permasalahan': document.getElementById('jenis_permasalahan').value,
+                'Catatan Permasalahan': document.getElementById('catatan_permasalahan').value,
+                Location: document.getElementById('location').value,
+                Status: document.getElementById('status').value || 'Menunggu', // Tambahkan status default
+                fotoK: document.getElementById('fotoK').value || '', // Jika mau upload, ini harus disesuaikan
+                timestamp: new Date().getTime()
+            };
+    
+            if (laporanId) {
+                laporanRef.child(laporanId).update(laporan);
+            } else {
+                laporanRef.push(laporan);
+            }
+    
+            document.getElementById('laporanForm').reset();
+            document.getElementById('laporanId').value = '';
+        });
+    
+        // Fungsi untuk mengisi form edit laporan
+        function editLaporan(laporanId) {
+    laporanRef.child(laporanId).once('value', (snapshot) => {
+        const laporan = snapshot.val();
+
+        document.getElementById('laporanId').value = laporanId;
+        document.getElementById('email').value = laporan.Email || '';
+        document.getElementById('jenis_permasalahan').value = laporan['Jenis Permasalahan'] || '';
+        document.getElementById('catatan_permasalahan').value = laporan['Catatan Permasalahan'] || '';
+        document.getElementById('location').value = laporan.Location || '';
+        document.getElementById('status').value = laporan.Status || '';
+
+        const fotoKPreview = document.getElementById('fotoKPreview');
+        if (laporan.fotoK) {
+            fotoKPreview.innerHTML = `
+                <a href="${laporan.fotoK}" target="_blank">
+                    <img src="${laporan.fotoK}" alt="Foto Kejadian" style="width:100px; height:100px; object-fit:cover; border-radius:5px;">
+                </a>
+            `;
+        } else {
+            fotoKPreview.innerHTML = 'Tidak ada foto';
+        }
+
+        // Mengisi timestamp pada input datetime-local
+        const timestamp = laporan.timestamp;
+        if (timestamp) {
+            const date = new Date(parseInt(timestamp));
+            // Mengonversi waktu ke zona waktu lokal
+            const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+            // Mengonversi ke format yang diterima oleh datetime-local (yyyy-mm-ddThh:mm)
+            let formattedDate = localDate.toISOString().slice(0, 16); // Mengambil bagian yang diperlukan
+            document.getElementById('timestamp').value = formattedDate;
+        } else {
+            document.getElementById('timestamp').value = ''; // Jika tidak ada timestamp
+        }
+    });
+}
+
+    
+        // Fungsi untuk menghapus laporan
+        function deleteLaporan(laporanId) {
+            if (confirm('Yakin ingin menghapus laporan ini?')) {
+                laporanRef.child(laporanId).remove();
+            }
+        }
+    </script>    
+</body>
+</html>
